@@ -1,1 +1,1 @@
-# gem-division
+#[ModKit Wiki](../../wiki)
