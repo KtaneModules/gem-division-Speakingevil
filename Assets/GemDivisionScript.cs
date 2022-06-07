@@ -1,4 +1,4 @@
-﻿using System.Collections;
+using System.Collections;
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
@@ -237,5 +237,49 @@ public class GemDivisionScript : MonoBehaviour {
         }
         for (int i = 0; i < 20; i++)
             cutpieces[i].SetActive(false);
+    }
+
+#pragma warning disable 414
+    private string TwitchPlaysHelpMessage = "!{0} cut <1-19> [Divides the ring at the specified numbers of spaces clockwise around the ring, starting from the original cut. Separate multiple cuts with spaces.] | !{0} undo [Removes all but the most recent cut.] | !{0} submit";
+#pragma warning restore 414
+
+    private IEnumerator ProcessTwitchCommand(string command)
+    {
+        string[] commands = command.ToLowerInvariant().Split(' ');
+        yield return null;
+        if(commands[0] == "undo")
+        {
+            cuts[randcut].OnInteract();
+            yield break;
+        }
+        if(commands[0] == "submit")
+        {
+            button.OnInteract();
+            yield break;
+        }
+        if(commands[0] == "cut")
+        {
+            if(commands.Length < 2)
+            {
+                yield return "sendtochaterror!f Invalid command length. Position must be specified.";
+                yield break;
+            }
+            int[] p = new int[commands.Length - 1];
+            for(int i = 0; i < commands.Length - 1; i++)
+            {
+                if(!int.TryParse(commands[i + 1], out p[i]) || p[i] < 1 || p[i] > 19)
+                {
+                    yield return "sendtochaterror!f \"" + commands[i + 1] + "\" is an invalid position.";
+                    yield break;
+                }
+            }
+            for(int i = 0; i < commands.Length - 1; i++)
+            {
+                cuts[(p[i] + randcut) % 20].OnInteract();
+                yield return new WaitForSeconds(0.2f);
+            }
+        }
+        else
+            yield return "sendtochaterror!f \"" + commands[0] + "\" is an invalid command.";
     }
 }
